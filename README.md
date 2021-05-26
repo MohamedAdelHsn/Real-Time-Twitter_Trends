@@ -11,5 +11,5 @@ that will consume tweets when they arrived and represent them as batches to appl
 
 3- After applying transformation we will post processed batches to flask server to visualize data in real-time dashboard
 
-4- apache HBase acts as storage layer built on top of Hadoop File System with low latency access (read / Write ) because writing stream data to HDFS is a high cost operation
+4- Apache HBase acts as storage layer built on top of Hadoop File System with low latency access (read / Write ) because writing stream data to HDFS is a high cost operation
 
