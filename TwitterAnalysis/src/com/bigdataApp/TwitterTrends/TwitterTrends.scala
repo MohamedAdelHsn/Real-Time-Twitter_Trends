@@ -11,15 +11,14 @@ import scala.collection.immutable.List
 import org.apache.hadoop.hbase.{HBaseConfiguration , HTableDescriptor , TableName}
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.util.Bytes
-
+import org.apache.log4j.{Logger , Level}
 import scala.util.Try
 import org.slf4j.LoggerFactory
 
 
 
-object myDEmo  {
+object TwitterTrends  {
   
-  @transient lazy val logger=LoggerFactory.getLogger(this.getClass())
   
   def main(args: Array[String]): Unit = {
     
@@ -32,34 +31,31 @@ object myDEmo  {
       System.setProperty("twitter4j.oauth.accessTokenSecret", twProperties.getProperty("ACCESS_TOKEN_SECRET"))
      
 
+      Logger.getLogger("org").setLevel(Level.ERROR);      
+    
       val sparkConf = new SparkConf()
       .setAppName("realtime-tracking-popular-hashTags")
       .setMaster("local[3]")    
-      /*.setJars(Array("/home/hdpadmin/Desktop/Jars/spark-streaming-twitter_2.12-2.4.0.jar" 
-          , "/home/hdpadmin/Desktop/Jars/twitter4j-core-4.0.7.jar" 
-          , "/home/hdpadmin/Downloads/twitter4j-stream-4.0.7.jar"))
-     */
+
       
-      val streamingContext = new StreamingContext(sparkConf, Seconds(1));
-     
+      val streamingContext = new StreamingContext(sparkConf, Seconds(1));    
       streamingContext.sparkContext.setLogLevel("OFF");
-            
-      val tweets = TwitterUtils.createStream(streamingContext , None)
-      
+    
+     //######################### Extract Data From twitter every 1 second ################################//
+    
+      val tweets = TwitterUtils.createStream(streamingContext , None)     
       val statuses = tweets.map(status => status.getText)
-      
       val hashTags = statuses.flatMap(_.split(" ")).filter(_.startsWith("#"))
-      
       val hashTagKeyValue = hashTags.map((_ , 1))     
-      
+    
       val hashTagsCounts:DStream[(String, Long)] = hashTagKeyValue
       .updateStateByKey(aggregate_hashtags_count)
-     // .reduceByKeyAndWindow((x:Int,y:Int)=>(x+y), (x:Int,y:Int)=>(x-y), Seconds(15), Seconds(3))
-      
+    
+     // .reduceByKeyAndWindow((x:Int,y:Int)=>(x+y), (x:Int,y:Int)=>(x-y), Seconds(15), Seconds(3))    
       //.transform(rdd => rdd.sortBy(x => x._2 , false))
       
-      
-      
+    
+     // define schema to create dataframe
       val schema = StructType( Array(
                  StructField("hashtag", StringType,true),
                  StructField("count", LongType,true)
@@ -68,13 +64,10 @@ object myDEmo  {
        
       // transform rdds to df and clean data then post it via REST API 
       hashTagsCounts.foreachRDD(process_rdd( _,  _ , schema))
+    
+      // store data streams to Hbase (The Hadoop Database for Real-time)
       hashTagsCounts.foreachRDD(rdd => if(!rdd.isEmpty()) rdd.foreach(send2Hbase(_)))
-      
-      
-      // Writing dstream of hashtags counts to HBase (The Hadoop Database for realTime)      
-      //hashTagsCounts.foreachRDD(rdd => if(!rdd.isEmpty()) rdd.foreach(send2Hbase(_)))
-   
-      //hashTagsCounts.print(10)
+     
      
       streamingContext.checkpoint("/home/hdpadmin/workspace/mytwitterApp/src/main")
       streamingContext.start()
@@ -114,7 +107,7 @@ object myDEmo  {
      }
        
      
-    // ###########################  Visualize data in real-live Dashboard  ##################################//
+    // ###########################  Visualize data in real-live Dashboard (Rest API --Flask)  ##################################//
 
          
      def process_rdd(rdd:RDD[(String , Long)] , time :Time , schema: StructType) {
