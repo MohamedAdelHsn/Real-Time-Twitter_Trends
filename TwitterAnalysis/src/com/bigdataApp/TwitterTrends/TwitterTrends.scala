@@ -124,8 +124,8 @@ object TwitterTrends  {
          hashtags_count_df.show()
                   
          
-         val top20HashTags:List[String] =  hashtags_count_df.select("hashtag").rdd.map(r => r(0).toString()).collect().toList        
-         val topHashTagsCount :List[String] = hashtags_count_df.select("count").rdd.map(r => r(0).toString()).collect().toList
+         val top10HashTags:List[String] =  hashtags_count_df.select("hashtag").rdd.map(r => r(0).toString()).collect().toList        
+         val top10HashTagsCount :List[String] = hashtags_count_df.select("count").rdd.map(r => r(0).toString()).collect().toList
          
          
          Utils.post_to_flaskDashboard("http://127.0.0.1:5000/updateData" , top20HashTags ,topHashTagsCount)
