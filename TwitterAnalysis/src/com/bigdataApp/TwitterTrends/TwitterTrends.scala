@@ -16,13 +16,10 @@ import scala.util.Try
 import org.slf4j.LoggerFactory
 
 
-
 object TwitterTrends  {
   
-  
   def main(args: Array[String]): Unit = {
-    
-    
+        
       val twProperties = Utils.getTwitterProperties();
       
       System.setProperty("twitter4j.oauth.consumerKey", twProperties.getProperty("CONSUMER_KEY"))
