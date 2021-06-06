@@ -55,15 +55,10 @@ object TwitterTrends  {
       //.transform(rdd => rdd.sortBy(x => x._2 , false))
       
     
-     // define schema to create dataframe
-      val schema = StructType( Array(
-                 StructField("hashtag", StringType,true),
-                 StructField("count", LongType,true)
-             ))
-      
+
        
       // transform rdds to df and clean data then post it via REST API 
-      hashTagsCounts.foreachRDD(process_rdd( _,  _ , schema))
+      hashTagsCounts.foreachRDD(process_rdd( _,  _ ))
     
       // store data streams to Hbase (The Hadoop Database for Real-time)
       hashTagsCounts.foreachRDD(rdd => if(!rdd.isEmpty()) rdd.foreach(send2Hbase(_)))
@@ -110,11 +105,17 @@ object TwitterTrends  {
     // ###########################  Visualize data in real-live Dashboard (Rest API --Flask)  ##################################//
 
          
-     def process_rdd(rdd:RDD[(String , Long)] , time :Time , schema: StructType) {
+     def process_rdd(rdd:RDD[(String , Long)] , time :Time) {
           
          val spark = new SQLContext(rdd.context)        
          val row_rdd = rdd.map(record => Row(record._1 , record._2))
          
+        // define schema to create dataframe
+        val schema = StructType( Array(
+                 StructField("hashtag", StringType,true),
+                 StructField("count", LongType,true)
+             ))
+      
          
          val df = spark.createDataFrame(row_rdd , schema)
          println(s"---------------------------- \n ---- $time ----")
