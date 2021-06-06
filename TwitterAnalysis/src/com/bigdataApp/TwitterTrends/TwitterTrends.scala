@@ -54,9 +54,7 @@ object TwitterTrends  {
      // .reduceByKeyAndWindow((x:Int,y:Int)=>(x+y), (x:Int,y:Int)=>(x-y), Seconds(15), Seconds(3))    
       //.transform(rdd => rdd.sortBy(x => x._2 , false))
       
-    
-
-       
+  
       // transform rdds to df and clean data then post it via REST API 
       hashTagsCounts.foreachRDD(process_rdd( _,  _ ))
     
