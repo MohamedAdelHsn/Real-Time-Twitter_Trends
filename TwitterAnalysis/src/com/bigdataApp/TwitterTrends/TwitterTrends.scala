@@ -46,6 +46,7 @@ object TwitterTrends  {
       val hashTagKeyValue = hashTags.map((_ , 1))     
     
       val hashTagsCounts:DStream[(String, Long)] = hashTagKeyValue
+      .reduceByKey(_+_)
       .updateStateByKey(aggregate_hashtags_count)
     
      // .reduceByKeyAndWindow((x:Int,y:Int)=>(x+y), (x:Int,y:Int)=>(x-y), Seconds(15), Seconds(3))    
