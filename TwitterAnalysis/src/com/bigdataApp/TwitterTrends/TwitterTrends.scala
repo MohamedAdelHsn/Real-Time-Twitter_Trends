@@ -32,7 +32,7 @@ object TwitterTrends  {
     
       val sparkConf = new SparkConf()
       .setAppName("realtime-tracking-popular-hashTags")
-      .setMaster("local[3]")    
+      .setMaster("local[2]")    
 
       
       val streamingContext = new StreamingContext(sparkConf, Seconds(1));    
@@ -52,7 +52,8 @@ object TwitterTrends  {
      // .reduceByKeyAndWindow((x:Int,y:Int)=>(x+y), (x:Int,y:Int)=>(x-y), Seconds(15), Seconds(3))    
       //.transform(rdd => rdd.sortBy(x => x._2 , false))
       
-  
+    //---------------------------- i have  a new code updates for more optimization ---------------------------------- //
+    
       // transform rdds to df and clean data then post it via REST API 
       hashTagsCounts.foreachRDD(process_rdd( _,  _ ))
     
