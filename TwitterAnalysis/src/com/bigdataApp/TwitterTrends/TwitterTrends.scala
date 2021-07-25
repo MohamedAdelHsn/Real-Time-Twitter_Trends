@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 import org.apache.log4j.{Logger , Level}
 
 
-object myDEmo {
+object TwitterTrends {
   
   @transient lazy val logger=LoggerFactory.getLogger(this.getClass())
   
