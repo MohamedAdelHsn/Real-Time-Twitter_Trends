@@ -101,7 +101,6 @@ object TwitterTrends {
   */
 
     
-    // ############################################# back top10hashtags to driver and send them to flask & hbase ################################################# //
     
     hashTagsCounts.foreachRDD { (rdd: RDD[(String, Long)], time: Time) =>
 
